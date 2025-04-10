@@ -17,7 +17,12 @@ const app = koa(feathers());
 
 // Middleware and configurations
 app.configure(configuration())
-   .use(cors())
+  .use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+      ? '*' // Or your specific Vercel URL
+      : 'http://localhost:5173', // Adjust based on your Vite dev server port
+    credentials: true
+  }))
    .use(errorHandler())
    .use(parseAuthentication())
    .use(bodyParser());
@@ -57,10 +62,9 @@ async function initializeApp() {
     //console.log("TEST");
 
     // Start the app server
-    const port = app.get('port') || 3031;
-    const host = app.get('host') || 'localhost';
+    const port = process.env.PORT || 3031;
     app.listen(port).then(() => {
-      console.log(`Feathers app is listening on http://${host}:${port}`);
+    console.log(`Feathers app is listening on port ${port}`);
     });
   } catch (error) {
     console.error('Error initializing app:', error);
@@ -70,4 +74,5 @@ async function initializeApp() {
 // Run the app initialization
 initializeApp();
 
+export default app;
 export { app };
